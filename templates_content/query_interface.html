@@ -1,0 +1,142 @@
+{% extends "content_base.html" %}
+
+{% block title %}Query Your Knowledge{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            💭 Query Your Knowledge
+        </h1>
+        <p class="text-xl text-gray-600">
+            Ask anything. Get instant synthesis from everything you know.
+        </p>
+        {% if trial_limits %}
+        <p class="text-sm text-amber-700 mt-2">Trial: {{ trial_limits.queries_used }} / {{ trial_limits.queries_limit }} free queries · <a href="/signup" class="font-semibold underline">Sign up</a> for 20 more/month</p>
+        {% endif %}
+    </div>
+
+    <!-- Main Query Input -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+        <form action="/query" method="POST">
+            <div class="mb-4">
+                <textarea
+                    name="query"
+                    rows="3"
+                    placeholder="What do I know about pricing psychology?
+Connect what I know about ADHD and productivity
+What patterns do I see in startup failures?
+Should I raise prices or focus on growth?"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                    required
+                    autofocus
+                ></textarea>
+            </div>
+
+            <button
+                type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg"
+            >
+                Search Your Knowledge
+            </button>
+        </form>
+
+        <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <button type="button" onclick="fillQuery('What do I know about pricing?')" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-left transition">
+                💰 Pricing
+            </button>
+            <button type="button" onclick="fillQuery('Synthesize everything on mental models')" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-left transition">
+                🧠 Mental Models
+            </button>
+            <button type="button" onclick="fillQuery('What patterns do I see in my failures?')" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-left transition">
+                📊 Patterns
+            </button>
+            <button type="button" onclick="fillQuery('What have I been learning lately?')" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-left transition">
+                🔍 Explore
+            </button>
+        </div>
+    </div>
+
+    <!-- Library Stats -->
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8 border-2 border-blue-100">
+        <h3 class="font-semibold text-gray-900 mb-4">Your Knowledge Library</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+                <div class="text-3xl font-bold text-blue-600">{{ stats.total or 0 }}</div>
+                <div class="text-sm text-gray-600">Total Items</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-green-600">{{ stats.articles or 0 }}</div>
+                <div class="text-sm text-gray-600">Articles</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-purple-600">{{ stats.notes or 0 }}</div>
+                <div class="text-sm text-gray-600">Your Notes</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-orange-600">{{ (stats.top_topics or [])|length }}</div>
+                <div class="text-sm text-gray-600">Topics</div>
+            </div>
+        </div>
+
+        {% if stats.top_topics %}
+        <div class="mt-4">
+            <p class="text-sm text-gray-600 mb-2">Top topics:</p>
+            <div class="flex flex-wrap gap-2">
+                {% for topic in stats.top_topics[:8] %}
+                <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700 border border-gray-200">
+                    {{ topic }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Queries -->
+    {% if recent_queries %}
+    <div class="bg-white rounded-2xl shadow-sm p-6 border-2 border-gray-100">
+        <h3 class="font-semibold text-gray-900 mb-4">Recent Queries</h3>
+        <div class="space-y-3">
+            {% for q in recent_queries %}
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <span class="text-2xl">
+                    {% if q.query_type == 'recall' %}🔍
+                    {% elif q.query_type == 'synthesis' %}🔗
+                    {% elif q.query_type == 'pattern' %}📊
+                    {% elif q.query_type == 'decision' %}🤔
+                    {% elif q.query_type == 'generate' %}✍️
+                    {% else %}💭{% endif %}
+                </span>
+                <div class="flex-1">
+                    <p class="text-gray-800">{{ q.query_text }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ q.timestamp[:16] if q.timestamp else '' }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Example Queries -->
+    <div class="mt-8 bg-gray-50 rounded-2xl p-6 border border-gray-200">
+        <h3 class="font-semibold text-gray-900 mb-4">Try asking:</h3>
+        <div class="space-y-2 text-sm text-gray-700">
+            <p>• "What do I know about [topic]?"</p>
+            <p>• "Connect what I know about X and Y"</p>
+            <p>• "What patterns do I see in my thinking about Z?"</p>
+            <p>• "I read something about penguins walking to death..."</p>
+            <p>• "Should I [make this decision]?"</p>
+            <p>• "What have I been learning lately?"</p>
+            <p>• "Synthesize everything on [topic]"</p>
+            <p>• "What's unique about my perspective on X?"</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function fillQuery(text) {
+    document.querySelector('textarea[name="query"]').value = text;
+}
+</script>
+{% endblock %}

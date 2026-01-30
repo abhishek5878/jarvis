@@ -1,0 +1,57 @@
+{% extends "content_base.html" %}
+
+{% block title %}My Library{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">📚 My Library</h1>
+        <a href="/import/bookmarks" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition">Import Bookmarks</a>
+    </div>
+
+    <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6 text-center border-2 border-gray-100">
+            <div class="text-3xl font-bold text-blue-600">{{ stats.total or 0 }}</div>
+            <div class="text-sm text-gray-600">Total</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6 text-center border-2 border-gray-100">
+            <div class="text-3xl font-bold text-green-600">{{ stats.articles or 0 }}</div>
+            <div class="text-sm text-gray-600">Articles</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6 text-center border-2 border-gray-100">
+            <div class="text-3xl font-bold text-purple-600">{{ stats.notes or 0 }}</div>
+            <div class="text-sm text-gray-600">Notes</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6 text-center border-2 border-gray-100">
+            <div class="text-3xl font-bold text-orange-600">{{ stats.social or 0 }}</div>
+            <div class="text-sm text-gray-600">Social</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-6 border-2 border-gray-100">
+        <h3 class="font-semibold text-gray-900 mb-4">Recent Items</h3>
+        {% if recent_items %}
+        <div class="space-y-3">
+            {% for item in recent_items[:30] %}
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <span class="text-xl">
+                    {% if item.content_category == 'article' %}📄
+                    {% elif item.content_category == 'my_note' %}📝
+                    {% elif item.content_category == 'social_reference' %}💬
+                    {% else %}🔗{% endif %}
+                </span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-gray-800 truncate">{{ (item.content or item.extracted_text or '')[:120] }}{% if (item.content or item.extracted_text or '')|length > 120 %}...{% endif %}</p>
+                    {% if item.source_url %}
+                    <a href="{{ item.source_url }}" target="_blank" rel="noopener" class="text-sm text-blue-600 hover:underline">{{ item.source_url[:60] }}...</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-600">No items yet. <a href="/save" class="text-blue-600 hover:underline">Save content</a> or <a href="/import/bookmarks" class="text-blue-600 hover:underline">import bookmarks</a>.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

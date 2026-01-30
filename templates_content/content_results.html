@@ -22,6 +22,22 @@
     {% if created_at %}
     <p class="text-sm text-gray-500 mt-2">Generated on {{ created_at[:10] }}</p>
     {% endif %}
+    
+    {% if share_hash %}
+    <div class="flex justify-center gap-2 mt-4">
+        <button type="button" onclick="shareGeneration()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">
+            🔗 Share for Feedback
+        </button>
+    </div>
+    {% endif %}
+    
+    {% if user_tier is defined and user_tier == 'free' %}
+    <div class="max-w-2xl mx-auto mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+        <p class="text-sm text-amber-800">
+            ℹ️ Free tier content includes a watermark. <a href="/upgrade" class="font-semibold underline text-amber-900">Upgrade to Pro</a> to remove it and get unlimited generations.
+        </p>
+    </div>
+    {% endif %}
 </div>
 
 <!-- LinkedIn Post -->
@@ -338,6 +354,15 @@ async function regenerateContent(format, generationId) {
         button.disabled = false;
         button.textContent = originalText;
     }
+}
+
+function shareGeneration() {
+    const shareUrl = '{{ request.url_root }}share/{{ share_hash or "" }}';
+    if (!shareUrl || shareUrl.endsWith('share/')) return;
+    navigator.clipboard.writeText(shareUrl).then(function() {
+        if (typeof showNotification === 'function') showNotification('✓ Share link copied! Send to friends for feedback.');
+        else alert('✓ Share link copied! Send to friends for feedback.');
+    });
 }
 
 async function saveDraft(format, generationId) {

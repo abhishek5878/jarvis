@@ -21,16 +21,11 @@ class ContentGenerator:
         
         self.client = anthropic.Anthropic(api_key=self.api_key)
     
-    def generate(self, topic: str, insights: List[Dict], user_voice: Optional[Dict] = None) -> Dict:
+    def generate(self, topic: str, insights: List[Dict], user_voice: Optional[Dict] = None,
+                 user_tier: str = 'free') -> Dict:
         """
-        Generate 3 content formats from insights
-        
-        Returns:
-            {
-                'linkedin': {...},
-                'twitter': {...},
-                'blog': {...}
-            }
+        Generate 3 content formats from insights.
+        user_tier: 'free' adds watermark; 'pro'/'team' no watermark.
         """
         context = self._build_context(insights)
         voice_instructions = self._get_voice_instructions(user_voice)
@@ -301,7 +296,10 @@ Sources used: 1, 2, 3, 4, 5"""
                 
                 response_text = response.content[0].text
                 print(f"✅ Claude API response received ({len(response_text):,} chars)")
-                return self._parse_response(response_text, insights)
+                result = self._parse_response(response_text, insights)
+                # Apply watermark for free tier
+                result = self._apply_watermark(result, user_tier)
+                return result
             
             except (APIConnectionError, BrokenPipeError, ConnectionError, OSError) as e:
                 # Network/connection errors - retry with backoff
@@ -387,6 +385,23 @@ Sources used: 1, 2, 3, 4, 5"""
         # Should never reach here, but just in case
         raise Exception("Content generation failed after all retry attempts.")
     
+    def _apply_watermark(self, result: Dict, user_tier: str) -> Dict:
+        """Add branded watermark to free tier content"""
+        if user_tier not in ('free', None, ''):
+            return result
+        watermark_linkedin = '\n\n---\n💡 Generated using ContentForge - Turn your saved links into content: contentforge.com'
+        watermark_twitter = '\n\n(Created with ContentForge: contentforge.com)'
+        watermark_blog = '\n\n---\n\n*Generated with ContentForge - AI content from your knowledge library. Try free: contentforge.com*'
+        if result.get('linkedin', {}).get('content'):
+            result['linkedin']['content'] = result['linkedin']['content'] + watermark_linkedin
+        if result.get('twitter', {}).get('thread'):
+            thread = result['twitter']['thread']
+            if thread:
+                thread[-1] = thread[-1] + watermark_twitter
+        if result.get('blog', {}).get('outline'):
+            result['blog']['outline'] = result['blog']['outline'] + watermark_blog
+        return result
+
     def _build_context(self, insights: List[Dict]) -> str:
         """Build context string from insights"""
         context_parts = []

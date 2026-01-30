@@ -1,0 +1,128 @@
+{% extends "content_base.html" %}
+
+{% block title %}Query Result{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <a href="/query" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2">← New Query</a>
+    </div>
+
+    <!-- Query -->
+    <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl p-6 mb-8 shadow-lg">
+        <p class="text-sm opacity-80 mb-2">Your Question:</p>
+        <h2 class="text-2xl font-bold">{{ query }}</h2>
+    </div>
+
+    <!-- Result -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-3xl">
+                {% if result.type == 'recall' %}🔍
+                {% elif result.type == 'synthesis' %}🔗
+                {% elif result.type == 'pattern' %}📊
+                {% elif result.type == 'decision' %}🤔
+                {% elif result.type == 'explore' %}🗺️
+                {% else %}💭{% endif %}
+            </span>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900">
+                    {% if result.type == 'recall' %}Here's what you know
+                    {% elif result.type == 'synthesis' %}Synthesis
+                    {% elif result.type == 'pattern' %}Patterns Found
+                    {% elif result.type == 'decision' %}Decision Context
+                    {% elif result.type == 'explore' %}Your Knowledge Map
+                    {% else %}Result{% endif %}
+                </h3>
+                <p class="text-sm text-gray-500">Based on {{ (result.insights or [])|length }} items from your library</p>
+            </div>
+        </div>
+
+        <!-- AI Response (markdown-friendly: newlines as br, bold preserved) -->
+        <div class="prose max-w-none mb-6 text-gray-800 whitespace-pre-wrap">{{ result.response }}</div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 pt-6 border-t-2 border-gray-100">
+            {% if result.type == 'synthesis' and result.synthesis_id %}
+            <a href="/synthesis/{{ result.synthesis_id }}" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition">
+                View Full Synthesis
+            </a>
+            {% endif %}
+
+            <button type="button" onclick="copyResponse()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium transition">
+                Copy
+            </button>
+
+            <a href="/query" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium transition">
+                New Query
+            </a>
+        </div>
+    </div>
+
+    <!-- Source Insights -->
+    {% if result.insights %}
+    <div class="bg-white rounded-2xl shadow-sm p-6 border-2 border-gray-100">
+        <h3 class="font-semibold text-gray-900 mb-4">
+            📚 Sources ({{ result.insights|length }} items)
+        </h3>
+
+        <div class="space-y-4">
+            {% for insight in result.insights[:10] %}
+            <div class="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition">
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">
+                        {% if insight.content_category == 'article' %}📄
+                        {% elif insight.content_category == 'my_note' %}📝
+                        {% elif insight.content_category == 'video' %}🎥
+                        {% elif insight.content_category == 'social_reference' %}💬
+                        {% else %}🔗{% endif %}
+                    </span>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-medium text-gray-900">
+                                {{ (insight.content or insight.extracted_text or '')[:100] }}{% if (insight.content or insight.extracted_text or '')|length > 100 %}...{% endif %}
+                            </p>
+                            {% if insight.shared_date %}
+                            <span class="text-xs text-gray-500 ml-4 whitespace-nowrap">
+                                {{ insight.shared_date[:10] }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if insight.source_url %}
+                        <a href="{{ insight.source_url }}" target="_blank" rel="noopener" class="text-sm text-blue-600 hover:underline">
+                            View source →
+                        </a>
+                        {% endif %}
+
+                        {% if insight.similarity_score is defined %}
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ (insight.similarity_score * 100)|int }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ (insight.similarity_score * 100)|int }}% relevant
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function copyResponse() {
+    const el = document.querySelector('.prose.whitespace-pre-wrap');
+    const text = el ? el.textContent : '';
+    navigator.clipboard.writeText(text).then(function() {
+        const btn = event.target;
+        btn.textContent = '✓ Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+}
+</script>
+{% endblock %}

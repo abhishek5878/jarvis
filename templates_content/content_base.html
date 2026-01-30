@@ -40,12 +40,28 @@
                     </div>
                 </a>
                 
-                <div class="flex space-x-6">
-                    <a href="/" class="text-gray-600 hover:text-blue-600 font-medium transition">Generate</a>
+                <div class="flex items-center space-x-6">
+                    <a href="/query" class="text-gray-600 hover:text-indigo-600 font-medium transition">💭 Query</a>
+                    <a href="/" class="text-gray-600 hover:text-blue-600 font-medium transition">✍️ Generate</a>
                     <a href="/save" class="text-gray-600 hover:text-green-600 font-medium transition">💾 Save</a>
                     <a href="/train-voice" class="text-gray-600 hover:text-purple-600 font-medium transition">🎯 Voice</a>
                     <a href="/drafts" class="text-gray-600 hover:text-orange-600 font-medium transition">📝 Drafts</a>
                     <a href="/history" class="text-gray-600 hover:text-blue-600 font-medium transition">History</a>
+                    <a href="/my-syntheses" class="text-gray-600 hover:text-indigo-600 font-medium transition">🔗 Syntheses</a>
+                    <a href="/waste-analysis" class="text-gray-600 hover:text-red-600 font-medium transition">📉 Waste</a>
+                    <a href="/library" class="text-gray-600 hover:text-green-600 font-medium transition">📚 Library</a>
+                    {% if current_user %}
+                    <a href="/my-voice" class="text-gray-600 hover:text-purple-600 font-medium transition">My Voice</a>
+                    <a href="/refer" class="text-gray-600 hover:text-green-600 font-medium transition">🎁 Refer</a>
+                    <span class="text-gray-500">|</span>
+                    <span class="text-gray-700 font-medium">{{ current_user.username }}</span>
+                    <a href="/impact" class="text-gray-600 hover:text-green-600 font-medium transition">Impact</a>
+                    <a href="/upgrade" class="text-gray-600 hover:text-amber-600 font-medium transition">Upgrade</a>
+                    <a href="/logout" class="text-gray-600 hover:text-red-600 font-medium transition">Logout</a>
+                    {% else %}
+                    <a href="/login" class="text-gray-600 hover:text-blue-600 font-medium transition">Login</a>
+                    <a href="/signup" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">Sign Up</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

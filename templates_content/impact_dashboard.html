@@ -1,0 +1,102 @@
+{% extends "content_base.html" %}
+
+{% block title %}Your Cortex Impact{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Your Cortex Impact</h1>
+        <p class="text-gray-600">Here's the value you're getting</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-8 text-center">
+            <div class="text-5xl font-bold mb-2">{{ time_saved_hours }}</div>
+            <div class="text-blue-100">Hours Saved</div>
+        </div>
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-8 text-center">
+            <div class="text-5xl font-bold mb-2">${{ money_value }}</div>
+            <div class="text-green-100">Value Created</div>
+        </div>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-8 text-center">
+            <div class="text-5xl font-bold mb-2">{{ roi }}x</div>
+            <div class="text-purple-100">ROI This Month</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 border-2 border-gray-100">
+        <h3 class="text-xl font-bold text-gray-900 mb-6">Your Activity</h3>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-4">Usage</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span class="text-gray-600">Total Queries</span><span class="font-bold text-blue-600">{{ queries }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600">Active Days</span><span class="font-bold text-blue-600">{{ active_days }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600">Syntheses Created</span><span class="font-bold text-blue-600">{{ syntheses }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600">Content Generated</span><span class="font-bold text-blue-600">{{ generations }}</span></div>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-4">Your Library</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span class="text-gray-600">Items Saved</span><span class="font-bold text-purple-600">{{ library_size }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600">Knowledge Accessed</span><span class="font-bold text-purple-600">{{ (queries / library_size * 100)|int if library_size else 0 }}%</span></div>
+                </div>
+                <div class="mt-4 pt-4 border-t">
+                    <p class="text-sm text-gray-600">
+                        <strong>Before Cortex:</strong> These {{ library_size }} items sat unused.<br>
+                        <strong>With Cortex:</strong> You've accessed them {{ queries }} times.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-green-200">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">ROI Breakdown</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold text-gray-900">Time Saved</p>
+                    <p class="text-sm text-gray-600">vs manual search and content creation</p>
+                </div>
+                <div class="text-right"><p class="text-2xl font-bold text-green-600">{{ time_saved_hours }} hours</p></div>
+            </div>
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold text-gray-900">Value of Time</p>
+                    <p class="text-sm text-gray-600">at $100/hour</p>
+                </div>
+                <div class="text-right"><p class="text-2xl font-bold text-green-600">${{ money_value }}</p></div>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t-2 border-green-300">
+                <div>
+                    <p class="font-semibold text-gray-900">Cortex Cost</p>
+                    <p class="text-sm text-gray-600">this month</p>
+                </div>
+                <div class="text-right"><p class="text-2xl font-bold text-gray-600">${{ cost_per_month }}</p></div>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t-2 border-green-500">
+                <div><p class="text-xl font-bold text-gray-900">Net Value</p></div>
+                <div class="text-right"><p class="text-3xl font-bold text-green-600">${{ money_value - cost_per_month }}</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center bg-white rounded-2xl shadow-sm p-8 border-2 border-gray-100">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Share Your Results</h3>
+        <p class="text-gray-600 mb-6">Help others discover Cortex</p>
+        <button type="button" onclick="shareResults()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+            Share on Twitter
+        </button>
+    </div>
+</div>
+
+<script>
+function shareResults() {
+    const text = "I've saved {{ time_saved_hours }} hours this month using Cortex to query my knowledge library. {{ library_size }} saved articles/notes → instant AI synthesis. Like ChatGPT but trained on MY knowledge.";
+    const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "content_base.html" %}
+
+{% block title %}Shared: {{ topic }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium">← Back to home</a>
+    </div>
+    
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Shared content</h1>
+        <p class="text-gray-600">Topic: "{{ topic }}"</p>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">💼 LinkedIn Post</h2>
+        <div class="whitespace-pre-wrap text-gray-800 bg-gray-50 p-6 rounded-xl border border-gray-200">{{ linkedin.content }}</div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">🐦 Twitter Thread</h2>
+        <div class="space-y-3">
+            {% for tweet in twitter.thread %}
+            <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                <div class="text-gray-800">{{ tweet }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">📝 Blog Outline</h2>
+        {% if blog.title %}<h3 class="text-2xl font-bold mb-4">{{ blog.title }}</h3>{% endif %}
+        {% if blog.intro %}<div class="whitespace-pre-wrap text-gray-700 mb-6">{{ blog.intro }}</div>{% endif %}
+        <div class="whitespace-pre-wrap text-gray-700">{{ blog.outline|default('') }}</div>
+    </div>
+    
+    {% if not current_user %}
+    <div class="text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Create your own content</h3>
+        <p class="text-gray-600 mb-4">Sign up free and generate content from your knowledge library.</p>
+        <a href="/signup" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Sign Up Free</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

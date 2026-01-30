@@ -1,0 +1,54 @@
+{% extends "content_base.html" %}
+
+{% block title %}Share Your Experience{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Help Others Discover Cortex</h1>
+        <p class="text-gray-600">Share your experience and get 10 bonus generations</p>
+    </div>
+
+    <div class="bg-blue-50 rounded-2xl p-6 mb-8 border border-blue-200">
+        <p class="text-sm text-gray-600 mb-2">Your Cortex journey:</p>
+        <div class="space-y-1 text-sm">
+            <p>✓ {{ stats.queries }} queries made</p>
+            <p>✓ {{ stats.library_size }} items in library</p>
+            <p>✓ {{ stats.time_saved }} hours saved</p>
+            <p>✓ {{ stats.active_days }} active days</p>
+        </div>
+    </div>
+
+    <form action="/testimonial" method="POST" class="bg-white rounded-2xl shadow-sm p-8 border-2 border-gray-100">
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">How has Cortex helped you?</label>
+            <textarea name="testimonial" rows="6" placeholder="Example: 'I have ADHD and forget everything. Cortex is like having a photographic memory. I've saved 10+ hours this month finding information I'd otherwise lost.'" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required></textarea>
+            <p class="text-xs text-gray-500 mt-1">Be specific! Numbers, use cases, and real outcomes help others understand the value.</p>
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+            <div class="flex gap-2">
+                {% for i in range(1, 6) %}
+                <label class="cursor-pointer">
+                    <input type="radio" name="rating" value="{{ i }}" class="sr-only peer" required>
+                    <div class="w-12 h-12 border-2 border-gray-300 rounded-xl flex items-center justify-center peer-checked:border-yellow-500 peer-checked:bg-yellow-50 hover:border-yellow-400">⭐</div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="mb-6">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="allow_public" class="rounded">
+                <span class="text-sm text-gray-700">I agree to have this testimonial displayed publicly on the website</span>
+            </label>
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Twitter handle (optional)</label>
+            <input type="text" name="twitter_handle" placeholder="@yourhandle" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+            Submit Testimonial (Get 10 Bonus Generations)
+        </button>
+    </form>
+</div>
+{% endblock %}

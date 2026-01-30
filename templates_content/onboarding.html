@@ -1,0 +1,42 @@
+{% extends "content_base.html" %}
+
+{% block title %}Onboarding{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Get Your Aha Moment</h1>
+        <p class="text-gray-600">Complete these steps to get the most from your knowledge library</p>
+    </div>
+
+    <div class="space-y-6 mb-12">
+        {% for step in steps %}
+        <div class="bg-white rounded-2xl shadow-sm p-6 border-2 {% if step.completed %}border-green-200 bg-green-50{% else %}border-gray-200{% endif %}">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl {% if step.completed %}bg-green-500 text-white{% else %}bg-gray-200 text-gray-600{% endif %}">
+                    {% if step.completed %}✓{% else %}{{ step.id }}{% endif %}
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900">{{ step.title }}</h3>
+                    <p class="text-gray-600 mt-1">{{ step.description }}</p>
+                    {% if not step.completed %}
+                    <a href="{{ step.action_url }}" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+                        {{ step.action_text }}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="bg-gray-50 rounded-2xl p-6 text-center">
+        <p class="text-gray-600 mb-4">Items saved: <strong>{{ items_saved }}</strong> · Queries made: <strong>{{ queries_made }}</strong></p>
+        <form action="/onboarding/complete" method="POST">
+            <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition">
+                I'm Done - Take Me Home
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

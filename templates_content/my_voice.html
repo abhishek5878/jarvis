@@ -1,0 +1,44 @@
+{% extends "content_base.html" %}
+
+{% block title %}My Voice{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-8">
+        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium">← Back to home</a>
+    </div>
+    
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">🎯 My Voice Profile</h1>
+        <p class="text-gray-600">Share your writing style with others</p>
+    </div>
+    
+    {% if voice %}
+    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-8">
+        <h3 class="font-bold text-green-900 mb-3">Voice profile active</h3>
+        <p class="text-sm text-green-800 mb-4">Tone: {{ voice.tone|default('—') }} • Style: {{ voice.sentence_style|default('—') }}</p>
+        
+        <div class="bg-white rounded-xl p-4 border border-green-300">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Your share link</label>
+            <div class="flex gap-2">
+                <input type="text" id="share-link" value="{{ share_link }}" readonly
+                       class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                <button onclick="navigator.clipboard.writeText(document.getElementById('share-link').value); event.target.textContent='✓ Copied!'; setTimeout(()=>event.target.textContent='Copy', 2000)"
+                        class="px-4 py-3 bg-blue-600 text-white rounded-lg font-medium">Copy</button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Anyone can view your voice style and generate content in your voice (first try free).</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 mb-8">
+        <h3 class="font-bold text-yellow-900 mb-2">No voice profile yet</h3>
+        <p class="text-yellow-800 mb-4">Train your voice to get a shareable profile and help others write in your style.</p>
+        <a href="/train-voice" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Train My Voice</a>
+    </div>
+    {% endif %}
+    
+    <div class="text-center">
+        <a href="/train-voice" class="text-blue-600 font-medium hover:underline">Edit voice profile</a>
+    </div>
+</div>
+{% endblock %}

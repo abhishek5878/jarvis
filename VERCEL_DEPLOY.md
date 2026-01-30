@@ -24,8 +24,10 @@ In **Vercel Dashboard → Your Project → Settings → Environment Variables**,
 | Name                 | Value        | Notes                    |
 |----------------------|-------------|--------------------------|
 | `ANTHROPIC_API_KEY`  | `sk-ant-…`  | Required for generation  |
+| `OPENAI_API_KEY`     | `sk-…`      | Required for query/embeddings |
 | `FIRECRAWL_API_KEY`  | `fc-…`      | Optional, for URL save   |
-| `SECRET_KEY`         | (random)    | Optional, for Flask sessions |
+| `SECRET_KEY`         | (random)    | Recommended for Flask sessions |
+| `SHARE_SECRET`       | (random)    | Optional, for share links |
 
 Use the same values you use locally.
 

@@ -9,6 +9,12 @@
 # - pathlib (built-in)
 # - dataclasses (built-in in Python 3.7+)
 
+# Query interface & semantic search
+openai>=1.0
+
+# Optional: faster similarity (embeddings work without numpy via fallback)
+# numpy>=1.20
+
 # Optional: for future enhancements
 # rich==13.7.0  # Better CLI output with colors and formatting
 # click==8.1.7  # More advanced CLI framework

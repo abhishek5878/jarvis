@@ -1,0 +1,17 @@
+{% extends "content_base.html" %}
+
+{% block title %}Import Twitter Bookmarks{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Import Twitter Bookmarks</h1>
+        <p class="text-gray-600">Connect your Twitter account to import bookmarked tweets into your library</p>
+    </div>
+    <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
+        <p class="text-amber-800 font-medium mb-4">Twitter OAuth integration is not yet configured.</p>
+        <p class="text-sm text-amber-700">To enable: set TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET and implement the OAuth callback in the app.</p>
+        <a href="/library" class="inline-block mt-6 bg-amber-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-amber-700 transition">Back to Library</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "content_base.html" %}
+
+{% block title %}Import Browser Bookmarks{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Import Browser Bookmarks</h1>
+        <p class="text-gray-600">Upload your Chrome bookmarks export (JSON) to add them to your library</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm p-8 border-2 border-gray-100">
+        <p class="text-sm text-gray-600 mb-4">In Chrome: Bookmarks → Bookmark Manager → ⋮ → Export bookmarks. Save the HTML or JSON file, then upload below.</p>
+        <form action="/import/bookmarks" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <input type="file" name="file" accept=".json,.html" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+                Upload and Import
+            </button>
+        </form>
+        <p class="text-xs text-gray-500 mt-4">Only the first 100 bookmarks will be imported. URLs are stored; full content can be extracted later with Firecrawl.</p>
+    </div>
+    <a href="/library" class="block mt-6 text-center text-blue-600 hover:underline">← Back to Library</a>
+</div>
+{% endblock %}
