@@ -1,0 +1,97 @@
+{% extends "content_base.html" %}
+
+{% block title %}Edit Draft: {{ draft.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="/drafts" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>Back to drafts</span>
+    </a>
+</div>
+
+<div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        ✏️ Edit Draft
+    </h1>
+    <p class="text-lg text-gray-600">
+        {{ draft.title }}
+    </p>
+</div>
+
+<div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100">
+    <form method="POST" action="/draft/{{ draft.id }}">
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Title
+            </label>
+            <input 
+                type="text"
+                value="{{ draft.title }}"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500"
+                readonly
+            >
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Format
+            </label>
+            <div class="px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl">
+                <span class="text-gray-700 font-medium">{{ draft.format|title }}</span>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Content
+            </label>
+            <textarea 
+                name="content"
+                rows="20"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 font-mono text-sm resize-none"
+                required
+            >{{ draft.content }}</textarea>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Notes (optional)
+            </label>
+            <textarea 
+                name="notes"
+                rows="4"
+                placeholder="Add notes, reminders, or ideas for this draft..."
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 resize-none"
+            >{{ draft.notes or '' }}</textarea>
+        </div>
+        
+        <div class="flex space-x-4">
+            <button 
+                type="submit"
+                class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl"
+            >
+                💾 Save Changes
+            </button>
+            <a 
+                href="/drafts"
+                class="px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition"
+            >
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="mt-8 bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+    <h3 class="font-bold text-blue-900 mb-2">💡 Tips</h3>
+    <ul class="text-sm text-blue-800 space-y-1">
+        <li>• Edit freely - your changes are saved automatically</li>
+        <li>• Use notes to track ideas or reminders</li>
+        <li>• Copy content when ready to publish</li>
+        <li>• Mark as published when you've posted it</li>
+    </ul>
+</div>
+{% endblock %}

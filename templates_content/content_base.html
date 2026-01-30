@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Content Generator{% endblock %} - Brain Gym</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="flex items-center space-x-3 hover:opacity-80 transition">
+                    <span class="text-3xl">✍️</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Content Generator</h1>
+                        <p class="text-xs text-gray-500">Turn saved insights into published content</p>
+                    </div>
+                </a>
+                
+                <div class="flex space-x-6">
+                    <a href="/" class="text-gray-600 hover:text-blue-600 font-medium transition">Generate</a>
+                    <a href="/save" class="text-gray-600 hover:text-green-600 font-medium transition">💾 Save</a>
+                    <a href="/train-voice" class="text-gray-600 hover:text-purple-600 font-medium transition">🎯 Voice</a>
+                    <a href="/drafts" class="text-gray-600 hover:text-orange-600 font-medium transition">📝 Drafts</a>
+                    <a href="/history" class="text-gray-600 hover:text-blue-600 font-medium transition">History</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-6xl mx-auto px-6 mt-6">
+                {% for category, message in messages %}
+                <div class="rounded-xl p-4 mb-4 {% if category == 'success' %}bg-green-50 text-green-800 border-2 border-green-200{% elif category == 'error' %}bg-red-50 text-red-800 border-2 border-red-200{% else %}bg-blue-50 text-blue-800 border-2 border-blue-200{% endif %} shadow-sm">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">{% if category == 'success' %}✅{% elif category == 'error' %}❌{% else %}ℹ️{% endif %}</span>
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-6 py-12 mt-16 text-center">
+        <div class="border-t border-gray-200 pt-8">
+            <p class="text-gray-500 text-sm">✍️ Content Generator · AI-powered writing from your personal library</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Copy to clipboard
+        function copyContent(text, buttonId) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✓ Copied to clipboard!');
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Copied!';
+                    button.classList.add('bg-green-600');
+                    button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('bg-green-600');
+                        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    }, 2000);
+                }
+            });
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

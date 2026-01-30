@@ -1,0 +1,14 @@
+# Brain Gym Phase 2 Requirements
+
+# Web Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Already have from Phase 1 (stdlib):
+# - sqlite3
+# - datetime
+# - re
+# - typing
+
+# Optional but recommended:
+# gunicorn==21.2.0  # For production deployment

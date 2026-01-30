@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Brain Gym{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Better prose reading */
+        .prose {
+            line-height: 1.8;
+        }
+        
+        .prose p {
+            margin-bottom: 1.25em;
+        }
+        
+        /* Card animations */
+        .insight-card {
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Textarea improvements */
+        .response-textarea {
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+        
+        .response-textarea:focus {
+            outline: none;
+            transform: scale(1.01);
+        }
+        
+        /* Content expansion */
+        .content-expandable {
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+            transition: max-height 0.5s ease;
+        }
+        
+        .content-expandable.expanded {
+            max-height: none;
+        }
+        
+        .content-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(to bottom, transparent, white);
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .content-expandable.expanded .content-fade {
+            opacity: 0;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Better focus states */
+        button:focus, a:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+    
+    <script>
+        // Expand/collapse content
+        function toggleContent(id) {
+            const element = document.getElementById('content-' + id);
+            const button = document.getElementById('toggle-' + id);
+            
+            if (element.classList.contains('expanded')) {
+                element.classList.remove('expanded');
+                button.innerHTML = '<span>📖 Read full article</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+            } else {
+                element.classList.add('expanded');
+                button.innerHTML = '<span>📕 Show less</span><svg class="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+            }
+        }
+        
+        // Auto-resize textarea
+        document.addEventListener('DOMContentLoaded', function() {
+            const textareas = document.querySelectorAll('.response-textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            });
+        });
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url_for('home') }}" class="flex items-center space-x-2">
+                        <span class="text-2xl">🧠</span>
+                        <span class="font-bold text-xl text-gray-900">Brain Gym</span>
+                    </a>
+                    
+                    <div class="hidden md:flex space-x-6">
+                        <a href="{{ url_for('home') }}" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition">
+                            Daily
+                        </a>
+                        <a href="{{ url_for('library') }}" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition">
+                            Library
+                        </a>
+                        <a href="{{ url_for('search') }}" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition">
+                            Search
+                        </a>
+                        <a href="{{ url_for('stats') }}" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition">
+                            Stats
+                        </a>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('add') }}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                    + Add Insight
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                    <div class="rounded-lg p-4 mb-4 {% if category == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif category == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div class="flex justify-around items-center h-16">
+            <a href="{{ url_for('home') }}" class="flex flex-col items-center text-gray-600 hover:text-blue-600">
+                <span class="text-xl">🏠</span>
+                <span class="text-xs">Daily</span>
+            </a>
+            <a href="{{ url_for('library') }}" class="flex flex-col items-center text-gray-600 hover:text-blue-600">
+                <span class="text-xl">📚</span>
+                <span class="text-xs">Library</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="flex flex-col items-center text-gray-600 hover:text-blue-600">
+                <span class="text-xl">🔍</span>
+                <span class="text-xs">Search</span>
+            </a>
+            <a href="{{ url_for('stats') }}" class="flex flex-col items-center text-gray-600 hover:text-blue-600">
+                <span class="text-xl">📊</span>
+                <span class="text-xs">Stats</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Add padding at bottom for mobile nav -->
+    <div class="h-20 md:hidden"></div>
+</body>
+</html>

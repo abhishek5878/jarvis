@@ -1,0 +1,49 @@
+# Dependencies and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# Logs and temp
+*.log
+app.log
+/tmp/
+
+# Other apps in repo (optional - keep if you only deploy content app)
+# app.py
+# templates/
+# utils.py (content app doesn't use these for Vercel deploy)
+
+# WhatsApp exports and large data (don't deploy to Vercel)
+WhatsApp*/
+*.vcf
+*.pdf
+*.jpg
+*.png
+*.csv
+
+# Backups (don't upload DB backups)
+backups/
+*.db-journal
+
+# Docs and notes (optional - remove if you want them in deploy)
+# *.md
+# PHASE*.md
+# CONTENT_*.md
+
+# Test and dev
+test_*.py
+sample_*.txt
+needs_review.csv
+extraction_stats_*.json

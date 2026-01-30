@@ -1,0 +1,130 @@
+{% extends "content_base.html" %}
+
+{% block title %}Train Your Voice{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-8">
+        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Back to home</span>
+        </a>
+    </div>
+    
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+            🎯 Train Your Voice
+        </h1>
+        <p class="text-lg text-gray-600">
+            Help Claude learn your unique writing style
+        </p>
+    </div>
+    
+    {% if current_profile %}
+    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-6 mb-8">
+        <div class="flex items-start gap-3">
+            <span class="text-3xl">✓</span>
+            <div class="flex-1">
+                <h3 class="font-bold text-green-900 mb-3 text-lg">Voice Profile Active</h3>
+                <div class="text-sm text-green-800 space-y-2 mb-4">
+                    <p><strong>Tone:</strong> {{ current_profile.tone|title }}</p>
+                    <p><strong>Style:</strong> {{ current_profile.sentence_style|title }} sentences, {{ current_profile.perspective|title }} person</p>
+                    <p><strong>Structure:</strong> {{ current_profile.structure_preference|title }}</p>
+                    <p><strong>Last updated:</strong> {{ current_profile.updated_at[:10] if current_profile.updated_at else 'N/A' }}</p>
+                </div>
+                {% if current_profile.analysis and current_profile.analysis.voice_summary %}
+                <div class="mt-4 p-3 bg-white rounded-lg border border-green-300">
+                    <p class="text-sm text-green-900 italic">
+                        {{ current_profile.analysis.voice_summary }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100">
+        <form method="POST" action="/train-voice">
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-3">
+                    How It Works
+                </h3>
+                <ol class="space-y-2 text-gray-700 list-decimal list-inside">
+                    <li>Paste 5-10 of your best LinkedIn/Twitter posts below</li>
+                    <li>Claude analyzes your tone, style, and patterns</li>
+                    <li>Future content matches YOUR voice automatically</li>
+                </ol>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    Your Sample Posts
+                </label>
+                <textarea 
+                    name="sample_posts"
+                    rows="15"
+                    placeholder="Paste 5-10 of your posts here. Include variety - different topics, formats, styles.
+
+Example format:
+---
+Post 1:
+Being wrong early is cheap. Almost adorable.
+You ship something messy, ten people try it...
+
+---
+Post 2:
+Most people think about goals wrong.
+They optimize for the milestone, not the system...
+
+---
+[Continue with more posts]"
+                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 font-mono text-sm resize-none"
+                    required
+                ></textarea>
+                <p class="text-sm text-gray-500 mt-2">
+                    Minimum 5 posts. More = better voice matching. Separate posts with "---"
+                </p>
+            </div>
+            
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+                <p class="text-sm text-blue-800">
+                    💡 <strong>Tip:</strong> Include posts that represent YOUR authentic voice. 
+                    Avoid copy-pasted content or posts written by others.
+                </p>
+            </div>
+            
+            <button 
+                type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+                🎯 Analyze My Voice (takes ~15 seconds)
+            </button>
+        </form>
+    </div>
+    
+    <div class="mt-8 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-purple-200">
+        <h3 class="font-bold text-gray-900 mb-4 text-lg">What Gets Analyzed</h3>
+        <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="font-semibold text-gray-800 mb-2">Writing Style:</p>
+                <ul class="space-y-1">
+                    <li>• Tone (casual, professional, provocative)</li>
+                    <li>• Sentence length and structure</li>
+                    <li>• Perspective (first/third person)</li>
+                </ul>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <p class="font-semibold text-gray-800 mb-2">Patterns:</p>
+                <ul class="space-y-1">
+                    <li>• Common phrases you use</li>
+                    <li>• How you open posts (question/story/data)</li>
+                    <li>• How you close (CTA/question/insight)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

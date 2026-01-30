@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+.env.local
+*.egg-info/
+.eggs/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# Logs and temp
+*.log
+app.log
+extraction.log
+/tmp/
+
+# Backups (optional: remove backups/ to commit backup DBs)
+backups/
+
+# Large exports and media (keep repo small; Content Generator doesn't need these)
+WhatsApp*/
+*.vcf
+*.pdf
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.webp
+needs_review.csv
+extraction_stats_*.json
+
+# Database (contains user data + may contain secrets - never commit)
+braingym.db
+*.db
+*.db-journal
+*.db-wal

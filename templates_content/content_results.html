@@ -1,0 +1,389 @@
+{% extends "content_base.html" %}
+
+{% block title %}Generated: {{ topic }}{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>Back to home</span>
+    </a>
+</div>
+
+<div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        Content Generated for: <span class="gradient-text">"{{ topic }}"</span>
+    </h1>
+    <p class="text-lg text-gray-600">
+        Based on <strong>{{ insights|length }} items</strong> from your library
+    </p>
+    {% if created_at %}
+    <p class="text-sm text-gray-500 mt-2">Generated on {{ created_at[:10] }}</p>
+    {% endif %}
+</div>
+
+<!-- LinkedIn Post -->
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-2xl">
+                💼
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">LinkedIn Post</h2>
+                <p class="text-sm text-gray-600">Ready to publish</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button 
+                id="copy-linkedin"
+                onclick="copyContent(document.getElementById('linkedin-content').textContent, 'copy-linkedin')"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md"
+            >
+                📋 Copy Post
+            </button>
+            <button 
+                onclick="saveDraft('linkedin', {{ generation_id }})"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition"
+            >
+                💾 Save as Draft
+            </button>
+        </div>
+    </div>
+    
+    <div class="prose prose-lg max-w-none mb-6">
+        <div id="linkedin-content" class="whitespace-pre-wrap text-gray-800 leading-relaxed bg-gray-50 p-6 rounded-xl border border-gray-200">{{ linkedin.content }}</div>
+    </div>
+    
+    <!-- Regenerate LinkedIn -->
+    <div class="border-t-2 pt-6 mb-6">
+        <div class="flex gap-3 items-start">
+            <input 
+                type="text" 
+                id="linkedin-feedback"
+                placeholder="e.g., Make it shorter, More casual, Add more data"
+                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm"
+            >
+            <button 
+                onclick="regenerateContent('linkedin', {{ generation_id }})"
+                class="px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition"
+            >
+                🔄 Regenerate
+            </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+            Give specific feedback to improve this content
+        </p>
+    </div>
+    
+    <div class="text-sm text-gray-500 border-t pt-4">
+        <div class="flex items-center space-x-2 mb-3">
+            <span class="font-semibold">📊 Stats:</span>
+            <span>{{ linkedin.word_count }} words</span>
+        </div>
+        {% if linkedin.sources %}
+        <div>
+            <strong class="block mb-2">📚 Based on:</strong>
+            <ul class="space-y-2 ml-4">
+                {% for source_id in linkedin.sources %}
+                {% set insight = insights|selectattr('id', 'equalto', source_id)|first %}
+                {% if insight %}
+                <li class="text-gray-600">
+                    • {{ insight.content[:120] }}...
+                    {% if insight.source_url %}
+                    <a href="{{ insight.source_url }}" target="_blank" class="text-blue-600 hover:underline ml-2">[source]</a>
+                    {% endif %}
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Twitter Thread -->
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl flex items-center justify-center text-2xl">
+                🐦
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Twitter Thread</h2>
+                <p class="text-sm text-gray-600">{{ twitter.thread|length }} tweets</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button 
+                id="copy-twitter"
+                onclick="copyTwitterThread()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md"
+            >
+                📋 Copy Thread
+            </button>
+            <button 
+                onclick="saveDraft('twitter', {{ generation_id }})"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition"
+            >
+                💾 Save as Draft
+            </button>
+        </div>
+    </div>
+    
+    <div class="space-y-4">
+        {% for tweet in twitter.thread %}
+        <div class="border-2 border-gray-200 rounded-xl p-5 bg-gray-50 hover:border-blue-300 transition">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                    {{ loop.index }}
+                </div>
+                <div class="flex-1">
+                    <div id="tweet-{{ loop.index }}" class="text-gray-800 leading-relaxed">{{ tweet }}</div>
+                    <div class="text-xs text-gray-500 mt-2">{{ tweet|length }}/280 characters</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Regenerate Twitter -->
+    <div class="border-t-2 pt-6 mt-6">
+        <div class="flex gap-3 items-start">
+            <input 
+                type="text" 
+                id="twitter-feedback"
+                placeholder="e.g., Make it shorter, More casual, Add more data"
+                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm"
+            >
+            <button 
+                onclick="regenerateContent('twitter', {{ generation_id }})"
+                class="px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition"
+            >
+                🔄 Regenerate
+            </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+            Give specific feedback to improve this content
+        </p>
+    </div>
+    
+    {% if twitter.sources %}
+    <div class="text-sm text-gray-500 border-t pt-4 mt-6">
+        <strong class="block mb-2">📚 Based on:</strong>
+        <ul class="space-y-2 ml-4">
+            {% for source_id in twitter.sources %}
+            {% set insight = insights|selectattr('id', 'equalto', source_id)|first %}
+            {% if insight %}
+            <li class="text-gray-600">
+                • {{ insight.content[:120] }}...
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Blog Post Outline -->
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-2xl">
+                📝
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Blog Post Outline</h2>
+                <p class="text-sm text-gray-600">Structure & key points</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button 
+                id="copy-blog"
+                onclick="copyBlogOutline()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md"
+            >
+                📋 Copy Outline
+            </button>
+            <button 
+                onclick="saveDraft('blog', {{ generation_id }})"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition"
+            >
+                💾 Save as Draft
+            </button>
+        </div>
+    </div>
+    
+    <div class="prose prose-lg max-w-none">
+        {% if blog.title %}
+        <h3 class="text-3xl font-bold mb-6 text-gray-900" id="blog-title">{{ blog.title }}</h3>
+        {% endif %}
+        
+        {% if blog.intro %}
+        <div class="mb-8">
+            <h4 class="text-xl font-semibold text-gray-900 mb-3">Introduction</h4>
+            <div id="blog-intro" class="text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 p-6 rounded-xl border border-gray-200">{{ blog.intro }}</div>
+        </div>
+        {% endif %}
+        
+        {% if blog.outline %}
+        <div class="mb-6">
+            <h4 class="text-xl font-semibold text-gray-900 mb-3">Outline</h4>
+            <div id="blog-outline" class="whitespace-pre-wrap text-gray-700 leading-relaxed bg-gray-50 p-6 rounded-xl border border-gray-200">{{ blog.outline }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Regenerate Blog -->
+    <div class="border-t-2 pt-6 mt-6">
+        <div class="flex gap-3 items-start">
+            <input 
+                type="text" 
+                id="blog-feedback"
+                placeholder="e.g., Make it shorter, More casual, Add more data"
+                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm"
+            >
+            <button 
+                onclick="regenerateContent('blog', {{ generation_id }})"
+                class="px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition"
+            >
+                🔄 Regenerate
+            </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+            Give specific feedback to improve this content
+        </p>
+    </div>
+    
+    {% if blog.sources %}
+    <div class="text-sm text-gray-500 border-t pt-4 mt-6">
+        <strong class="block mb-2">📚 Based on:</strong>
+        <ul class="space-y-2 ml-4">
+            {% for source_id in blog.sources %}
+            {% set insight = insights|selectattr('id', 'equalto', source_id)|first %}
+            {% if insight %}
+            <li class="text-gray-600">
+                • {{ insight.content[:120] }}...
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Actions -->
+<div class="flex justify-center space-x-4">
+    <a href="/" class="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg">
+        <span>✨ Generate More Content</span>
+    </a>
+    <a href="/history" class="inline-flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-4 rounded-xl font-bold transition">
+        <span>📚 View History</span>
+    </a>
+</div>
+
+<script>
+function copyTwitterThread() {
+    const tweets = document.querySelectorAll('[id^="tweet-"]');
+    const text = Array.from(tweets).map((t, i) => `${i+1}/ ${t.textContent}`).join('\n\n');
+    copyContent(text, 'copy-twitter');
+}
+
+function copyBlogOutline() {
+    const title = document.getElementById('blog-title')?.textContent || '';
+    const intro = document.getElementById('blog-intro')?.textContent || '';
+    const outline = document.getElementById('blog-outline')?.textContent || '';
+    
+    const text = `${title}\n\n${intro}\n\n${outline}`;
+    copyContent(text, 'copy-blog');
+}
+
+async function regenerateContent(format, generationId) {
+    const feedbackInput = document.getElementById(`${format}-feedback`);
+    const feedback = feedbackInput.value.trim();
+    
+    if (!feedback) {
+        alert('Please provide specific feedback');
+        return;
+    }
+    
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = '⏳ Regenerating...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('format', format);
+        formData.append('feedback', feedback);
+        
+        const response = await fetch(`/regenerate/${generationId}`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Reload page to show new content
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error regenerating: ' + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+async function saveDraft(format, generationId) {
+    let content = '';
+    let title = '';
+    
+    if (format === 'linkedin') {
+        content = document.getElementById('linkedin-content').textContent;
+        title = prompt('Draft title:', `{{ topic }} - LinkedIn Post`);
+    } else if (format === 'twitter') {
+        const tweets = document.querySelectorAll('[id^="tweet-"]');
+        content = Array.from(tweets).map((t, i) => `${i+1}/ ${t.textContent}`).join('\n\n');
+        title = prompt('Draft title:', `{{ topic }} - Twitter Thread`);
+    } else if (format === 'blog') {
+        const titleEl = document.getElementById('blog-title');
+        const intro = document.getElementById('blog-intro')?.textContent || '';
+        const outline = document.getElementById('blog-outline')?.textContent || '';
+        content = `${titleEl?.textContent || ''}\n\n${intro}\n\n${outline}`;
+        title = prompt('Draft title:', titleEl?.textContent || `{{ topic }} - Blog Outline`);
+    }
+    
+    if (!title) return;
+    
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('format', format);
+    formData.append('content', content);
+    formData.append('generation_id', generationId);
+    formData.append('topic', '{{ topic }}');
+    
+    try {
+        const response = await fetch('/save-draft', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✓ Saved as draft!');
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error saving draft: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Search Responses - Brain Gym{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Search Your Responses</h1>
+    
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('search') }}" class="mb-8">
+        <div class="flex gap-3">
+            <input type="text" 
+                   name="q" 
+                   value="{{ keyword }}"
+                   placeholder="Search by keyword..."
+                   class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            
+            <input type="text" 
+                   name="tag" 
+                   value="{{ tag }}"
+                   placeholder="Filter by tag..."
+                   class="w-48 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
+                Search
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results -->
+{% if results %}
+    <div class="mb-6">
+        <p class="text-gray-600">Found {{ results|length }} responses</p>
+    </div>
+    
+    <div class="space-y-6">
+        {% for result in results %}
+        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+            <!-- Original Insight -->
+            <div class="mb-4 pb-4 border-b border-gray-200">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                        {{ result.source_type }}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                        {{ result.shared_date }}
+                    </span>
+                </div>
+                
+                {% if result.tags %}
+                <div class="flex flex-wrap gap-2 mb-3">
+                    {% for tag in result.tags.split(',')[:5] %}
+                    <a href="{{ url_for('search', tag=tag.strip()) }}"
+                       class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition">
+                        {{ tag.strip() }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <p class="text-gray-900 leading-relaxed">
+                    {{ result.content }}
+                </p>
+                
+                {% if result.source_url %}
+                <a href="{{ result.source_url }}" 
+                   target="_blank"
+                   class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-flex items-center space-x-1">
+                    <span>View source</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Your Response -->
+            <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-green-800 font-medium text-sm">Your Response</span>
+                    <span class="text-green-600 text-xs">
+                        {{ result.response_created_at[:10] }}
+                    </span>
+                </div>
+                <p class="text-gray-900">
+                    {{ result.response_text }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% elif keyword or tag %}
+    <!-- No results -->
+    <div class="text-center py-16">
+        <span class="text-6xl mb-4 block">🔍</span>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">No results found</h2>
+        <p class="text-gray-600">Try a different keyword or tag</p>
+    </div>
+
+{% else %}
+    <!-- Initial state -->
+    <div class="text-center py-16">
+        <span class="text-6xl mb-4 block">💭</span>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Search your thinking</h2>
+        <p class="text-gray-600">Enter a keyword or tag to find your responses</p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Practice - Brain Gym{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <!-- Progress Bar -->
+    {% if insights %}
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Your Daily Practice</h2>
+                <p class="text-2xl font-bold text-gray-900">{{ today }}</p>
+            </div>
+            
+            {% if stats.current_streak > 0 %}
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl shadow-lg">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🔥</span>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold leading-none">{{ stats.current_streak }}</div>
+                        <div class="text-xs font-medium opacity-90">day streak</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full transition-all duration-500" 
+                 style="width: 0%" id="progress-bar"></div>
+        </div>
+        <p class="text-sm text-gray-600 mt-2 text-center">
+            <span id="progress-text">Complete 3 insights today</span>
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <div id="insight-container">
+        {% if insights %}
+            <!-- Insights will be shown one at a time -->
+            {% for insight in insights %}
+            <div class="insight-slide" data-index="{{ loop.index0 }}" style="display: {{ 'block' if loop.index0 == 0 else 'none' }}">
+                
+                <!-- Card -->
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-100">
+                    
+                    <!-- Header -->
+                    <div class="relative">
+                        <!-- Progress Badge -->
+                        <div class="absolute top-6 left-6 z-10">
+                            <div class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-200">
+                                <span class="text-sm font-bold text-gray-900">{{ loop.index }} of {{ insights|length }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="absolute top-6 right-6 z-10 flex space-x-2">
+                            <form method="POST" action="{{ url_for('archive', insight_id=insight.id) }}" class="inline">
+                                <button type="submit" 
+                                        class="p-3 bg-white/90 backdrop-blur-sm hover:bg-red-50 rounded-full shadow-lg border border-gray-200 transition group"
+                                        onclick="return confirm('Archive this insight?')"
+                                        title="Not interested">
+                                    <svg class="w-5 h-5 text-gray-400 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Gradient Header -->
+                        <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 px-8 py-12 text-white">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <span class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-bold rounded-full border border-white/30">
+                                    {{ insight.display_content.badge }}
+                                </span>
+                                {% if insight.quality_score and insight.quality_score >= 7 %}
+                                <span class="px-4 py-2 bg-yellow-400/30 backdrop-blur-sm text-yellow-100 text-sm font-bold rounded-full border border-yellow-300/30">
+                                    ⭐ High Value
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if insight.tags %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for tag in insight.tags.split(',')[:4] %}
+                                <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/30">
+                                    #{{ tag.strip() }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Content Area -->
+                    <div class="px-8 py-10">
+                        <!-- Reading Time -->
+                        {% if insight.display_content.full_text %}
+                        {% set word_count = (insight.display_content.full_text|length / 5)|int %}
+                        {% set reading_time = (word_count / 200)|int %}
+                        {% if reading_time > 0 %}
+                        <div class="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>{{ reading_time }} min read</span>
+                            <span>•</span>
+                            <span>{{ word_count }} words</span>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        
+                        <!-- Main Content -->
+                        <div class="prose prose-lg max-w-none">
+                            {% if insight.display_content.has_full_content and insight.display_content.full_text|length > 500 %}
+                                <!-- Expandable Content -->
+                                <div id="content-{{ insight.id }}" class="content-expandable-v2">
+                                    <div class="text-gray-800 leading-loose text-lg whitespace-pre-wrap">
+                                        {{ insight.display_content.full_text }}
+                                    </div>
+                                    <div class="content-fade-v2"></div>
+                                </div>
+                                <button onclick="toggleContentV2({{ insight.id }})" 
+                                        id="toggle-{{ insight.id }}"
+                                        class="mt-6 w-full py-3 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 text-blue-700 font-semibold rounded-xl transition flex items-center justify-center space-x-2 border border-blue-200">
+                                    <span>📖 Read full content</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            {% else %}
+                                <!-- Short Content -->
+                                <div class="text-gray-800 leading-loose text-lg whitespace-pre-wrap">
+                                    {{ insight.display_content.preview or insight.content }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Context Note -->
+                        {% if insight.context_message and insight.context_message|length < 200 %}
+                        <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-lg">
+                            <p class="text-sm text-amber-900">
+                                <span class="font-semibold">💬 Why you saved this:</span> "{{ insight.context_message }}"
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Source Link -->
+                        {% if insight.source_url and insight.display_content.show_url %}
+                        <div class="mt-6 pt-6 border-t border-gray-100">
+                            <a href="{{ insight.source_url }}" 
+                               target="_blank"
+                               class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium text-sm transition group">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                <span class="group-hover:underline">View original source</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Prompt Section -->
+                    <div class="px-8 py-8 bg-gradient-to-r from-indigo-50 to-purple-50 border-t-2 border-gray-100">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                                    💭
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Your Turn</h3>
+                                <p class="text-xl text-gray-900 font-medium leading-relaxed">
+                                    {{ insight.prompt }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Response Form -->
+                    <div class="px-8 py-8 bg-gray-50">
+                        <form method="POST" action="{{ url_for('respond') }}" class="space-y-6" onsubmit="return handleSubmit(event, {{ loop.index0 }})">
+                            <input type="hidden" name="insight_id" value="{{ insight.id }}">
+                            
+                            <!-- Quick Reactions -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    ⚡ Quick reaction (optional)
+                                </label>
+                                <div class="flex space-x-3">
+                                    <button type="button" class="reaction-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-green-400 hover:bg-green-50 transition">
+                                        <span class="text-2xl">👍</span>
+                                        <span class="block text-xs text-gray-600 mt-1">Agree</span>
+                                    </button>
+                                    <button type="button" class="reaction-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-red-400 hover:bg-red-50 transition">
+                                        <span class="text-2xl">👎</span>
+                                        <span class="block text-xs text-gray-600 mt-1">Disagree</span>
+                                    </button>
+                                    <button type="button" class="reaction-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-yellow-400 hover:bg-yellow-50 transition">
+                                        <span class="text-2xl">🤔</span>
+                                        <span class="block text-xs text-gray-600 mt-1">Interesting</span>
+                                    </button>
+                                    <button type="button" class="reaction-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition">
+                                        <span class="text-2xl">💡</span>
+                                        <span class="block text-xs text-gray-600 mt-1">Insight</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Text Response -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    ✍️ Your response (2-3 sentences)
+                                </label>
+                                <textarea 
+                                    name="response_text"
+                                    rows="5"
+                                    class="response-textarea w-full px-5 py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 resize-none transition"
+                                    placeholder="What's your honest take? Be specific and concise..."
+                                    required></textarea>
+                                <p class="mt-2 text-xs text-gray-500">💡 Tip: Be honest. This is for you, not public.</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex space-x-3">
+                                <button type="submit"
+                                        class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                                    <span>✅ Submit & Continue</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                                
+                                <button type="button"
+                                        onclick="skipInsight({{ insight.id }}, {{ loop.index0 }})"
+                                        class="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition">
+                                    ⏭️ Skip
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Hidden skip form -->
+                        <form id="skip-form-{{ insight.id }}" 
+                              method="POST" 
+                              action="{{ url_for('skip', insight_id=insight.id) }}"
+                              style="display: none;"></form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Completion Screen -->
+            <div id="completion-screen" style="display: none;">
+                <div class="text-center py-16">
+                    <div class="mb-8">
+                        <div class="inline-block animate-bounce">
+                            <span class="text-8xl">🎉</span>
+                        </div>
+                    </div>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Great work today!</h2>
+                    <p class="text-xl text-gray-600 mb-8">You've processed all 3 insights. Your thinking is evolving!</p>
+                    
+                    <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto mb-8">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border-2 border-blue-200">
+                            <div class="text-3xl font-bold text-blue-600 mb-1">{{ stats.total_responses + 3 }}</div>
+                            <div class="text-sm text-blue-700 font-medium">Total Responses</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border-2 border-purple-200">
+                            <div class="text-3xl font-bold text-purple-600 mb-1">{{ stats.current_streak + 1 }}</div>
+                            <div class="text-sm text-purple-700 font-medium">Day Streak 🔥</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border-2 border-green-200">
+                            <div class="text-3xl font-bold text-green-600 mb-1">{{ stats.pending - 3 }}</div>
+                            <div class="text-sm text-green-700 font-medium">Still to Explore</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <a href="{{ url_for('library') }}" 
+                           class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg">
+                            📚 View Your Response Library
+                        </a>
+                        <p class="text-gray-500">Come back tomorrow for 3 new insights!</p>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- No Insights Available -->
+            <div class="text-center py-20">
+                <span class="text-8xl mb-6 block">✨</span>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">All caught up!</h2>
+                <p class="text-xl text-gray-600 mb-8">You've responded to all available insights.</p>
+                <a href="{{ url_for('add') }}" 
+                   class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg">
+                    ➕ Add More Insights
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Content Expansion V2 */
+.content-expandable-v2 {
+    max-height: 500px;
+    overflow: hidden;
+    position: relative;
+    transition: max-height 0.5s ease;
+}
+
+.content-expandable-v2.expanded {
+    max-height: none;
+}
+
+.content-fade-v2 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 150px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.content-expandable-v2.expanded .content-fade-v2 {
+    opacity: 0;
+}
+
+/* Reaction buttons */
+.reaction-btn.active {
+    border-width: 3px;
+    transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.insight-slide {
+    animation: slideIn 0.4s ease-out;
+}
+</style>
+
+<script>
+let currentIndex = 0;
+const totalInsights = {{ insights|length if insights else 0 }};
+let completed = 0;
+
+// Update progress
+function updateProgress() {
+    const progress = (completed / totalInsights) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+    document.getElementById('progress-text').textContent = 
+        completed === 0 ? `Complete ${totalInsights} insights today` :
+        completed < totalInsights ? `${completed} of ${totalInsights} complete • Keep going!` :
+        `All done! 🎉`;
+}
+
+// Toggle content expansion
+function toggleContentV2(id) {
+    const element = document.getElementById('content-' + id);
+    const button = document.getElementById('toggle-' + id);
+    
+    if (element.classList.contains('expanded')) {
+        element.classList.remove('expanded');
+        button.innerHTML = '<span>📖 Read full content</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+    } else {
+        element.classList.add('expanded');
+        button.innerHTML = '<span>📕 Show less</span><svg class="w-5 h-5 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+        button.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Handle form submission
+function handleSubmit(event, index) {
+    event.preventDefault();
+    const form = event.target;
+    
+    // Submit via AJAX
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form)
+    }).then(response => {
+        if (response.ok) {
+            completed++;
+            updateProgress();
+            showNextInsight(index);
+        }
+    });
+    
+    return false;
+}
+
+// Skip insight
+function skipInsight(insightId, index) {
+    document.getElementById('skip-form-' + insightId).submit();
+    setTimeout(() => showNextInsight(index), 100);
+}
+
+// Show next insight
+function showNextInsight(currentIdx) {
+    // Hide current
+    document.querySelectorAll('.insight-slide')[currentIdx].style.display = 'none';
+    
+    // Show next or completion
+    if (currentIdx + 1 < totalInsights) {
+        document.querySelectorAll('.insight-slide')[currentIdx + 1].style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        document.getElementById('completion-screen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// Reaction button handling
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Toggle active state
+            this.classList.toggle('active');
+        });
+    });
+    
+    updateProgress();
+});
+</script>
+
+{% endblock %}

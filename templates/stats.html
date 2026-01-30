@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Brain Gym{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Brain Gym Stats</h1>
+    <p class="text-gray-600">Track your progress and engagement</p>
+</div>
+
+<!-- Key Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-600 text-sm font-medium">Total Responses</span>
+            <span class="text-2xl">✍️</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900">{{ stats.total_responses }}</div>
+        <p class="text-sm text-gray-500 mt-1">Original thoughts created</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-600 text-sm font-medium">Current Streak</span>
+            <span class="text-2xl">🔥</span>
+        </div>
+        <div class="text-3xl font-bold text-orange-600">{{ stats.current_streak }}</div>
+        <p class="text-sm text-gray-500 mt-1">Days in a row</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-600 text-sm font-medium">Response Rate</span>
+            <span class="text-2xl">📊</span>
+        </div>
+        <div class="text-3xl font-bold text-green-600">{{ stats.response_rate }}%</div>
+        <p class="text-sm text-gray-500 mt-1">Insights engaged with</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-600 text-sm font-medium">Pending</span>
+            <span class="text-2xl">⏳</span>
+        </div>
+        <div class="text-3xl font-bold text-blue-600">{{ stats.pending }}</div>
+        <p class="text-sm text-gray-500 mt-1">Insights waiting</p>
+    </div>
+</div>
+
+<!-- Top Themes -->
+<div class="bg-white rounded-xl shadow-md p-6 border border-gray-200 mb-8">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Themes You Engage With Most</h2>
+    
+    {% if stats.top_themes %}
+    <div class="space-y-4">
+        {% for theme, count in stats.top_themes %}
+        <div class="flex items-center">
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-gray-900 font-medium">{{ theme }}</span>
+                    <span class="text-gray-600 text-sm">{{ count }} responses</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 rounded-full h-2" 
+                         style="width: {{ (count / stats.top_themes[0][1] * 100)|round }}%"></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 text-center py-8">Start responding to see your themes!</p>
+    {% endif %}
+</div>
+
+<!-- Activity Timeline -->
+<div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Response Activity (Last 30 Days)</h2>
+    
+    {% if stats.responses_by_date %}
+    <div class="space-y-3">
+        {% for day in stats.responses_by_date %}
+        <div class="flex items-center">
+            <span class="text-gray-600 text-sm w-32">{{ day.date }}</span>
+            <div class="flex-1 flex items-center space-x-1">
+                {% for i in range(day.count) %}
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                {% endfor %}
+                <span class="text-gray-600 text-sm ml-2">{{ day.count }} response{{ 's' if day.count != 1 }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 text-center py-8">No activity yet. Start your daily practice!</p>
+    {% endif %}
+</div>
+
+<!-- Motivation -->
+<div class="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-200">
+    <div class="text-center">
+        <span class="text-4xl mb-3 block">🌟</span>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">
+            You've built {{ stats.total_responses }} original thoughts!
+        </h3>
+        <p class="text-gray-700 max-w-2xl mx-auto">
+            {% if stats.total_responses == 0 %}
+            Start your daily practice to build your content library. Each response is a seed for future content.
+            {% elif stats.total_responses < 10 %}
+            Great start! Keep going to build your unique perspective library.
+            {% elif stats.total_responses < 50 %}
+            You're building momentum! Your perspective library is growing.
+            {% elif stats.total_responses < 100 %}
+            Impressive! You have a substantial library of original thinking.
+            {% else %}
+            Exceptional! You've built a treasure trove of original thoughts. This is your intellectual property.
+            {% endif %}
+        </p>
+    </div>
+</div>
+{% endblock %}

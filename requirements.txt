@@ -1,0 +1,15 @@
+# Brain Gym Requirements
+# Python 3.8+
+
+# No external dependencies required for Phase 1!
+# Uses only Python standard library:
+# - sqlite3 (built-in)
+# - re (built-in)
+# - datetime (built-in)
+# - pathlib (built-in)
+# - dataclasses (built-in in Python 3.7+)
+
+# Optional: for future enhancements
+# rich==13.7.0  # Better CLI output with colors and formatting
+# click==8.1.7  # More advanced CLI framework
+# pandas==2.1.4  # Data analysis for Phase 2

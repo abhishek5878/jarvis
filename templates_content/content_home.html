@@ -1,0 +1,197 @@
+{% extends "content_base.html" %}
+
+{% block title %}Generate Content{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        Turn Your Saved Links Into <span class="gradient-text">Published Content</span>
+    </h1>
+    <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
+        Never stare at a blank page again. Generate LinkedIn posts, Twitter threads, and blog outlines in 30 seconds.
+    </p>
+    
+    <!-- Save Button -->
+    <a 
+        href="/save" 
+        class="inline-flex items-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+    >
+        <span>💾</span>
+        <span>Save New Content to Library</span>
+    </a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-gray-100">
+    <form action="/generate" method="POST" class="space-y-6" onsubmit="return handleSubmit()">
+        <div>
+            <label for="topic" class="block text-lg font-semibold text-gray-900 mb-3">
+                💡 What do you want to write about?
+            </label>
+            <input 
+                type="text" 
+                id="topic" 
+                name="topic" 
+                placeholder="e.g., startup mistakes, pricing psychology, founder burnout, remote work challenges"
+                class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
+                required
+            >
+            <p class="mt-2 text-sm text-gray-500">
+                💡 Tip: Be specific! "Why startups fail at pricing" works better than just "pricing"
+            </p>
+        </div>
+        
+        <button 
+            type="submit"
+            id="generate-button"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+            ✨ Generate Content
+        </button>
+    </form>
+    
+    <div class="mt-6 text-center">
+        <span class="text-gray-500 font-medium">or</span>
+    </div>
+    
+    <button 
+        onclick="suggestTopics()"
+        id="suggest-button"
+        class="w-full mt-4 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 text-lg px-8 py-4 rounded-xl font-bold transition shadow-md"
+    >
+        💡 Generate 5 Random Ideas from My Library
+    </button>
+</div>
+
+<div id="suggested-topics" class="hidden"></div>
+
+<!-- Library Stats -->
+<div class="grid md:grid-cols-3 gap-6 mb-12">
+    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border-2 border-blue-200">
+        <div class="text-4xl font-bold text-blue-600 mb-2">{{ stats.total_insights }}</div>
+        <div class="text-sm text-blue-700 font-medium">Saved Insights</div>
+        
+        {% if recent_saves %}
+        <div class="mt-4 pt-4 border-t border-blue-200">
+            <p class="text-xs text-blue-700 font-semibold mb-2">Recently Saved:</p>
+            <div class="space-y-1">
+                {% for save in recent_saves[:3] %}
+                <div class="text-xs text-blue-600 flex items-start space-x-2">
+                    <span>
+                        {% if save.content_category == 'article' %}📄
+                        {% elif save.content_category == 'my_note' %}📝
+                        {% elif save.content_category == 'video' %}🎥
+                        {% elif save.content_category == 'code' %}💻
+                        {% elif save.content_category == 'social_reference' %}📱
+                        {% else %}🔗{% endif %}
+                    </span>
+                    <span class="truncate flex-1">{{ save.content[:50] }}...</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border-2 border-green-200">
+        <div class="text-4xl font-bold text-green-600 mb-2">{{ stats.articles_with_content }}</div>
+        <div class="text-sm text-green-700 font-medium">Full Articles</div>
+    </div>
+    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border-2 border-purple-200">
+        <div class="text-4xl font-bold text-purple-600 mb-2">{{ stats.your_notes }}</div>
+        <div class="text-sm text-purple-700 font-medium">Your Notes</div>
+    </div>
+</div>
+
+<!-- Recent Generations -->
+{% if recent_generations %}
+<div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-100">
+    <h3 class="text-2xl font-bold text-gray-900 mb-6">📚 Recent Generations</h3>
+    <div class="space-y-3">
+        {% for gen in recent_generations %}
+        <a href="/generation/{{ gen[0] }}" class="block p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition border border-gray-200">
+            <div class="flex items-center justify-between">
+                <span class="font-semibold text-gray-900">{{ gen[1] }}</span>
+                <span class="text-sm text-gray-500">{{ gen[2][:10] }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    <a href="/history" class="block mt-4 text-center text-blue-600 hover:text-blue-700 font-medium">
+        View all history →
+    </a>
+</div>
+{% endif %}
+
+<script>
+function handleSubmit() {
+    const button = document.getElementById('generate-button');
+    button.disabled = true;
+    button.innerHTML = '🤖 Generating content... (this takes 20-30 seconds)';
+    button.classList.add('opacity-75', 'cursor-wait');
+    return true;
+}
+
+function suggestTopics() {
+    const button = document.getElementById('suggest-button');
+    button.disabled = true;
+    button.textContent = '🔍 Analyzing your library...';
+    
+    fetch('/suggest-topics')
+        .then(r => r.json())
+        .then(data => {
+            if (data.topics && data.topics.length > 0) {
+                displaySuggestions(data.topics);
+            } else {
+                showNotification('No topic suggestions found. Try adding more content to your library.');
+            }
+            button.disabled = false;
+            button.innerHTML = '💡 Generate 5 Random Ideas from My Library';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error generating suggestions');
+            button.disabled = false;
+            button.innerHTML = '💡 Generate 5 Random Ideas from My Library';
+        });
+}
+
+function displaySuggestions(topics) {
+    const container = document.getElementById('suggested-topics');
+    container.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-purple-200">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">💡 Content Ideas from Your Library</h3>
+            <div class="space-y-4">
+                ${topics.map((t, i) => `
+                    <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-purple-500 cursor-pointer transition transform hover:-translate-y-1" 
+                         onclick="generateFromTopic('${t.topic.replace(/'/g, "\\'")}')">
+                        <h4 class="text-lg font-bold text-gray-900 mb-2">${i+1}. ${t.topic}</h4>
+                        <p class="text-sm text-gray-600 mb-3">${t.angle}</p>
+                        <div class="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>📚 ${t.count} saved items</span>
+                            <span>⭐ ${t.quality}/10 quality</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    container.classList.remove('hidden');
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function generateFromTopic(topic) {
+    document.getElementById('topic').value = topic;
+    document.querySelector('form').submit();
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'copy-notification bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

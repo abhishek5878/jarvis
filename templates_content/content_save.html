@@ -1,0 +1,282 @@
+{% extends "content_base.html" %}
+
+{% block title %}Save Content{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Back to home</span>
+        </a>
+    </div>
+    
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+            💾 Save to Your Library
+        </h1>
+        <p class="text-lg text-gray-600">
+            Add new content and use it immediately in generation
+        </p>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100">
+        <!-- Tab Selector -->
+        <div class="flex border-b-2 border-gray-200 mb-8">
+            <button 
+                onclick="showTab('url')" 
+                id="url-tab"
+                class="tab-button active flex-1 px-6 py-4 font-bold text-blue-600 border-b-4 border-blue-600 transition"
+            >
+                🔗 Save URL
+            </button>
+            <button 
+                onclick="showTab('text')" 
+                id="text-tab"
+                class="tab-button flex-1 px-6 py-4 font-bold text-gray-500 border-b-4 border-transparent transition"
+            >
+                📝 Save Note
+            </button>
+        </div>
+        
+        <!-- URL Form -->
+        <div id="url-form" class="tab-content">
+            <form onsubmit="saveContent(event, 'url')" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        🔗 URL to save
+                    </label>
+                    <input 
+                        type="url" 
+                        id="url-input"
+                        placeholder="https://example.com/article-about-startups"
+                        class="w-full px-5 py-4 text-lg border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
+                        required
+                    >
+                    <p class="text-sm text-gray-500 mt-2">
+                        ✅ Supports: Articles, LinkedIn, Twitter/X, YouTube, GitHub, Reddit
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        💬 Why are you saving this? (Optional)
+                    </label>
+                    <textarea 
+                        id="url-note"
+                        rows="3"
+                        placeholder="e.g., Great example of first principles thinking in pricing strategy"
+                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition resize-none"
+                    ></textarea>
+                </div>
+                
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                    🚀 Extract & Save
+                </button>
+            </form>
+            
+            <div class="mt-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <p class="text-sm text-blue-900">
+                    <strong>💡 How it works:</strong> We'll extract the full content, categorize it automatically, and make it immediately available for content generation.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Text Form -->
+        <div id="text-form" class="tab-content hidden">
+            <form onsubmit="saveContent(event, 'text')" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        ✍️ Your Note / Insight / Idea
+                    </label>
+                    <textarea 
+                        id="text-input"
+                        rows="10"
+                        placeholder="Write your thoughts, ideas, frameworks, insights, lessons learned...
+
+Example:
+I've noticed that successful founders don't optimize for productivity - they optimize for learning velocity. The faster you can test assumptions and learn from failures, the faster you can iterate toward product-market fit."
+                        class="w-full px-5 py-4 text-base border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition resize-none"
+                        required
+                    ></textarea>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Minimum 50 characters. Will be auto-tagged based on content.
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        🏷️ Context (Optional)
+                    </label>
+                    <input 
+                        type="text"
+                        id="text-note"
+                        placeholder="e.g., From conversation with YC founder, Reading 'Zero to One', Personal reflection"
+                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
+                    >
+                </div>
+                
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-lg px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                    💾 Save Note
+                </button>
+            </form>
+            
+            <div class="mt-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
+                <p class="text-sm text-green-900">
+                    <strong>💡 Pro tip:</strong> Your personal notes are often the most valuable for content generation because they contain your original thinking and unique perspective.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Message -->
+    <div id="status-message" class="hidden mt-6"></div>
+    
+    <!-- Tips Section -->
+    <div class="mt-8 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border-2 border-purple-200">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">💡 Save Content Tips</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="font-semibold text-gray-900 mb-2">✅ Good to Save</div>
+                <ul class="space-y-1 text-sm text-gray-600">
+                    <li>• Articles with unique insights</li>
+                    <li>• Your original frameworks</li>
+                    <li>• Interesting takes from experts</li>
+                    <li>• Examples and case studies</li>
+                    <li>• Personal lessons learned</li>
+                </ul>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="font-semibold text-gray-900 mb-2">⚡ What Happens</div>
+                <ul class="space-y-1 text-sm text-gray-600">
+                    <li>• Content is extracted & stored</li>
+                    <li>• Auto-categorized & tagged</li>
+                    <li>• Immediately searchable</li>
+                    <li>• Available for generation</li>
+                    <li>• Grows your knowledge base</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tab-button {
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    border-bottom-width: 4px;
+}
+</style>
+
+<script>
+function showTab(type) {
+    // Update tabs
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
+        btn.classList.add('text-gray-500', 'border-transparent');
+    });
+    
+    const activeTab = document.getElementById(`${type}-tab`);
+    activeTab.classList.add('active', 'text-blue-600', 'border-blue-600');
+    activeTab.classList.remove('text-gray-500', 'border-transparent');
+    
+    // Update forms
+    document.querySelectorAll('.tab-content').forEach(form => {
+        form.classList.add('hidden');
+    });
+    document.getElementById(`${type}-form`).classList.remove('hidden');
+}
+
+async function saveContent(event, type) {
+    event.preventDefault();
+    
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.textContent;
+    button.disabled = true;
+    
+    if (type === 'url') {
+        button.textContent = '🔄 Extracting content...';
+    } else {
+        button.textContent = '💾 Saving...';
+    }
+    
+    const formData = new FormData();
+    formData.append('type', type);
+    
+    if (type === 'url') {
+        formData.append('content', document.getElementById('url-input').value);
+        formData.append('note', document.getElementById('url-note').value);
+    } else {
+        formData.append('content', document.getElementById('text-input').value);
+        formData.append('note', document.getElementById('text-note').value);
+    }
+    
+    try {
+        const response = await fetch('/save', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        showStatus(result.success, result.message);
+        
+        if (result.success) {
+            // Clear form
+            event.target.reset();
+            
+            // Offer to generate content
+            setTimeout(() => {
+                const shouldGenerate = confirm('✅ Content saved! Generate content with it now?');
+                if (shouldGenerate) {
+                    window.location.href = '/';
+                }
+            }, 1000);
+        }
+        
+    } catch (error) {
+        showStatus(false, 'Error saving content: ' + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+function showStatus(success, message) {
+    const statusDiv = document.getElementById('status-message');
+    statusDiv.className = `mt-6 p-5 rounded-xl border-2 ${
+        success 
+            ? 'bg-green-50 text-green-900 border-green-200' 
+            : 'bg-red-50 text-red-900 border-red-200'
+    }`;
+    
+    statusDiv.innerHTML = `
+        <div class="flex items-start space-x-3">
+            <span class="text-2xl">${success ? '✅' : '❌'}</span>
+            <div class="flex-1">
+                <p class="font-semibold mb-1">${success ? 'Success!' : 'Error'}</p>
+                <p class="text-sm">${message}</p>
+            </div>
+        </div>
+    `;
+    
+    statusDiv.classList.remove('hidden');
+    
+    // Auto-hide after 8 seconds
+    setTimeout(() => {
+        statusDiv.classList.add('hidden');
+    }, 8000);
+}
+</script>
+{% endblock %}

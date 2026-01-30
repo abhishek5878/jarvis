@@ -1,0 +1,111 @@
+{% extends "content_base.html" %}
+
+{% block title %}Drafts{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="/" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>Back to home</span>
+    </a>
+</div>
+
+<div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        📝 Your Drafts
+    </h1>
+    <p class="text-lg text-gray-600">
+        Edit, refine, and publish your saved content
+    </p>
+</div>
+
+{% if drafts %}
+<div class="space-y-4">
+    {% for draft in drafts %}
+    <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-100 hover:border-blue-300 transition">
+        <div class="flex justify-between items-start">
+            <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="text-2xl">
+                        {% if draft.format == 'linkedin' %}💼
+                        {% elif draft.format == 'twitter' %}🐦
+                        {% else %}📝{% endif %}
+                    </span>
+                    <h3 class="text-xl font-bold text-gray-900">{{ draft.title }}</h3>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        {{ draft.format|title }}
+                    </span>
+                </div>
+                
+                {% if draft.topic %}
+                <p class="text-sm text-gray-600 mb-2">Topic: {{ draft.topic }}</p>
+                {% endif %}
+                
+                <div class="text-sm text-gray-500 mb-4">
+                    <p>Created: {{ draft.created_at[:10] if draft.created_at else 'N/A' }}</p>
+                    <p>Last updated: {{ draft.updated_at[:10] if draft.updated_at else 'N/A' }}</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <p class="text-gray-700 text-sm line-clamp-3">
+                        {{ draft.content[:200] }}...
+                    </p>
+                </div>
+            </div>
+            
+            <div class="ml-6 flex flex-col space-y-2">
+                <a 
+                    href="/draft/{{ draft.id }}"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition text-center"
+                >
+                    ✏️ Edit
+                </a>
+                <button 
+                    onclick="publishDraft({{ draft.id }})"
+                    class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition"
+                >
+                    ✅ Publish
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-gray-50 rounded-2xl p-12 text-center border-2 border-gray-200">
+    <div class="text-6xl mb-4">📝</div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-2">No Drafts Yet</h3>
+    <p class="text-gray-600 mb-6">
+        Save content as drafts from the results page to edit and refine later.
+    </p>
+    <a href="/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold transition">
+        Generate Content
+    </a>
+</div>
+{% endif %}
+
+<script>
+async function publishDraft(draftId) {
+    if (!confirm('Mark this draft as published?')) return;
+    
+    try {
+        const response = await fetch(`/draft/${draftId}/publish`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✓ Marked as published!');
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
